@@ -1,3 +1,9 @@
+/**
+ * Copyright 2017–2018, LaborX PTY
+ * Licensed under the AGPL Version 3 license.
+ * @author Egor Zuev <zyev.egor@gmail.com>
+ */
+
 require('dotenv/config');
 
 const config = require('../config'),
@@ -9,6 +15,7 @@ const config = require('../config'),
 
 mongoose.Promise = Promise;
 mongoose.accounts = mongoose.createConnection(config.mongo.accounts.uri);
+mongoose.data = mongoose.createConnection(config.mongo.data.uri);
 
 const ctx = {
     network: null,
@@ -16,6 +23,7 @@ const ctx = {
   },
   expect = require('chai').expect,
   accountModel = require('../models/accountModel'),
+  txModel = require('../models/txModel'),
   ipcExec = require('./helpers/ipcExec'),
   request = Promise.promisify(require('request')),
   scope = {};
@@ -82,7 +90,7 @@ describe('core/rest', function () {
   });
 
   it('register addresses', async () => {
-    await Promise.delay(10000);
+    await Promise.delay(30000);
     let responses = await Promise.all(ctx.accounts.map(account => {
       let keyring = new bcoin.keyring(account.privateKey, ctx.network);
       return request({
@@ -120,4 +128,24 @@ describe('core/rest', function () {
     )
   });
 
+
+  it('validate utxo history ', async () => {
+    let keyring = new bcoin.keyring(ctx.accounts[0].privateKey, ctx.network);
+    const address = keyring.getAddress().toString();
+
+    let response = await request({
+      url: `http://${config.rest.domain}:${config.rest.port}/addr/${address}/utxo`,
+      method: 'get',
+      json: true
+    });
+
+    expect(response.body).to.not.empty;
+    const utxo = response.body[0];
+
+    expect(utxo.height).to.greaterThan(-1);
+    expect(utxo.address).to.equal(address);
+    expect(utxo.txIndex).an('number');
+    expect(utxo).to.contain.all.keys(['amount', 'satoshis', 'height', 'vout']);
+    
+  });
 });
