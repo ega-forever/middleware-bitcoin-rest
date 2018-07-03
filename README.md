@@ -1,4 +1,4 @@
-# middleware-nem-rest [![Build Status](https://travis-ci.org/ChronoBank/middleware-nem-rest.svg?branch=master)](https://travis-ci.org/ChronoBank/middleware-nem-rest)
+# middleware-bitcoin-rest [![Build Status](https://travis-ci.org/ChronoBank/middleware-bitcoin-rest.svg?branch=master)](https://travis-ci.org/ChronoBank/middleware-bitcoin-rest)
 
 Middleware service for which expose rest api
 
@@ -10,7 +10,7 @@ This module is a part of middleware services. You can install it in 2 ways:
 2) by hands: just clone the repo, do 'npm install', set your .env - and you are ready to go
 
 #### About
-This module is used for interaction with middleware. This happens through the layer, which is built on node-red.
+This module is used for interaction with middleware. This happens through the layer, which is built on chronobank [sdk](https://github.com/ChronoBank/middleware-service-sdk).
 So, you don't need to write any code - you can create your own flow with UI tool supplied by node-red itself. Access by this route:
 ```
 /admin
@@ -40,6 +40,7 @@ The available routes are listed below:
 | /addr/{address}/balance   | GET |  | retrieve balance of the registered address
 | /addr/{address}/utxo   | GET | |returns an array of unspent transactions (utxo)
 | /tx/send   | POST |  ``` {tx: <string>} ``` - raw encoded transaction | broadcast new transaction to network
+| /tx/{address}/history   | GET |  | retrieve transactions for the registered adresses [use skip and limit paramters].
 
 
 
@@ -56,6 +57,7 @@ IPC_NAME=bitcoin
 IPC_PATH=/tmp/
 NODERED_MONGO_URI=mongodb://localhost:27018/data
 NODERED_AUTO_SYNC_MIGRATIONS=true
+HTTP_ADMIN=/admin
 ```
 
 The options are presented below:
@@ -73,6 +75,7 @@ The options are presented below:
 | IPC_PATH   | directory, where to store ipc file (you can skip this option on windows)
 | NODERED_MONGO_URI   | the URI string for mongo collection for keeping node-red users and flows (optional, if omitted - then default MONGO_URI will be used)
 | NODERED_AUTO_SYNC_MIGRATIONS   | autosync migrations on start (default = yes)
+| HTTP_ADMIN | admin path for nodered or false (if not publish as default)
 
 
 
